@@ -43,7 +43,7 @@ def get_history_of_choosen_user(username, history):
 
 
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket.connect(("127.0.0.1", 8500))
+socket.connect(("62.60.178.229", 8500))
 for a in range(1, 4):
     try:
         file = open("cookies.json", "r", encoding="utf-8")
