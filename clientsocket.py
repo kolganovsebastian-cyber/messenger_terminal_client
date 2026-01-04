@@ -9,14 +9,14 @@ import time
 def receive_messages():
     while True:
         message = mp.recv_information(socket)
-        message2 = message[1]
         if message[0] == "JSN":
-            message = json.loads(message)
-            message2 = message[1]
-        if message2 == "Ok Exit":
-            break
-        if message2["sender_username"] == req_user:
-            print(message2["message"])
+            print(message)
+            data = json.loads(message[1])
+            if data["sender_username"] == req_user:
+                print(data["message"])
+        elif message[0] == "TXT":
+            if message[1] == "Ok Exit":
+                break
 
 
 def get_history(socket):
@@ -43,7 +43,7 @@ def get_history_of_choosen_user(username, history):
 
 
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket.connect(("62.60.178.229", 8500))
+socket.connect(("127.0.0.1", 8500))
 for a in range(1, 4):
     try:
         file = open("cookies.json", "r", encoding="utf-8")
