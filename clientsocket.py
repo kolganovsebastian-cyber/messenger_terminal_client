@@ -4,16 +4,25 @@ from protocol import protocol as mp
 import json
 import datetime
 import time
+import sys
+
+HOST = "127.0.0.1"
+PORT = "8500"
+
+if sys.argv[1] == "prod":
+    HOST = "62.60.178.229"
 
 
 def receive_messages():
     while True:
         message = mp.recv_information(socket)
+        print(message)
         if message[0] == "JSN":
-            print(message)
             data = json.loads(message[1])
             if data["sender_username"] == req_user:
                 print(data["message"])
+            else:
+                print(f"New Message from {data["sender_username"]}")
         elif message[0] == "TXT":
             if message[1] == "Ok Exit":
                 break
@@ -33,6 +42,11 @@ def get_users_in_string(history):
 
 def get_history_of_choosen_user(username, history):
     history = history[username]
+    message_ids = []
+    for b in history:
+        message_ids.append(b["message_id"])
+    print(message_ids)
+    mp.send_jason(socket, message_ids)
     message = ""
     for a in history:
         if a["is_sent"] == True:
@@ -43,7 +57,7 @@ def get_history_of_choosen_user(username, history):
 
 
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket.connect(("127.0.0.1", 8500))
+socket.connect((HOST, PORT))
 for a in range(1, 4):
     try:
         file = open("cookies.json", "r", encoding="utf-8")
@@ -76,6 +90,7 @@ for a in range(1, 4):
         break
 
 history = get_history(socket)
+
 while True:
     users = get_users_in_string(history)
     print(users)
@@ -87,7 +102,9 @@ while True:
         dicti = {"message": message_sent, "receiver_username": req_user}
         mp.send_jason(socket, dicti)
         break
-    print(get_history_of_choosen_user(req_user, history))
+    history_of_choosen_user = get_history_of_choosen_user(req_user, history)
+    print(history_of_choosen_user)
+
 
     thread = threading.Thread(target=receive_messages)
     thread.start()
@@ -96,6 +113,9 @@ while True:
         message_sent = input("")
         if message_sent == "exit":
             break
+        else:
+            dicti = {"message": message_sent, "receiver_username": req_user}
+            mp.send_jason(socket, dicti)
 
 time.sleep(0.5)
 socket.close()
